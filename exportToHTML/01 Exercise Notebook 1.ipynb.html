@@ -1,0 +1,196 @@
+<html>
+<head>
+<title>01 Exercise Notebook 1.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #bcbec4;}
+.s1 { color: #7a7e85;}
+.s2 { color: #cf8e6d;}
+.s3 { color: #bcbec4;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+.ls0 { height: 1px; border-width: 0; color: #43454a; background-color:#43454a}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+01 Exercise Notebook 1.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% md 
+# Exercise 1 
+ 
+We first load a dataset and examine its dimensions. <hr class="ls0">#%% 
+</span><span class="s1"># If you are running this on Google Colab, uncomment and run the following lines; otherwise ignore this cell</span>
+<span class="s1"># from google.colab import drive</span>
+<span class="s1"># drive.mount('/content/drive')</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s2">import </span><span class="s0">math</span>
+<span class="s2">import </span><span class="s0">numpy </span><span class="s2">as </span><span class="s0">np</span>
+
+<span class="s0">xy_data </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">load</span><span class="s3">(</span><span class="s4">'Ex1_polyreg_data.npy'</span><span class="s3">)</span>
+<span class="s1"># If running on Google Colab change path to '/content/drive/MyDrive/IB-Data-Science/Exercises/Ex1_polyreg_data.npy'</span>
+
+<span class="s0">np</span><span class="s3">.</span><span class="s0">shape</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">)</span>
+<span class="s0">print</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% md 
+The matrix `xy_data` contains $70$ rows, each a data point of the form $(x_i,y_i)$ for $i=1, \ldots, 70$. <hr class="ls0">#%% md 
+### 1a) Plot the data in a scatterplot. <hr class="ls0">#%% 
+</span><span class="s2">import </span><span class="s0">matplotlib</span><span class="s3">.</span><span class="s0">pyplot </span><span class="s2">as </span><span class="s0">plt</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">scatter</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">0</span><span class="s3">], </span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">1</span><span class="s3">]) </span><span class="s1">#take all rows of column 0 for x and all rows of column 1 for y</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">xlabel</span><span class="s3">(</span><span class="s4">'x'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">ylabel</span><span class="s3">(</span><span class="s4">'y'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">show</span><span class="s3">()</span>
+
+<hr class="ls0"><span class="s0">#%% md 
+### 1b) Write a function `polyreg` to fit a polynomial of a given order to a dataset.  
+The inputs to the function are a data matrix of dimension $N \times 2$,  and $k \geq 0$, the order of the polynomial.   The function should compute the coefficients of the polynomial $\beta_0 + \beta_1 x +  \ldots  +\beta_k x^{k}$ via least squares regression, and should return the coefficient vector, the fit, and the vector of residuals.  
+ 
+If specified the degree $k$ is greater than or equal to $N$, then the function must fit an order $(N-1)$ polynomial and set the remaining coefficients to zero. 
+ 
+**NOTE**: You are *not* allowed to use the built-in function `np.polyfit`. <hr class="ls0">#%% 
+</span><span class="s2">def </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">data_matrix</span><span class="s3">, </span><span class="s0">k</span><span class="s3">):</span>
+    <span class="s1"># N = Number of data points (rows in the data mat)</span>
+    <span class="s0">N </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">shape</span><span class="s3">(</span><span class="s0">data_matrix</span><span class="s3">)[</span><span class="s5">0</span><span class="s3">]</span>
+
+    <span class="s1"># Extract x and y columns from the data mat</span>
+    <span class="s0">x </span><span class="s3">= </span><span class="s0">data_matrix</span><span class="s3">[:, </span><span class="s5">0</span><span class="s3">]</span>
+    <span class="s0">y </span><span class="s3">= </span><span class="s0">data_matrix</span><span class="s3">[:, </span><span class="s5">1</span><span class="s3">]</span>
+
+    <span class="s1"># As instructed, If k is too large (&gt;=N), we only fit up to degree N - 1, and set all remaining coeff to 0</span>
+    <span class="s2">if </span><span class="s0">k </span><span class="s3">&gt;= </span><span class="s0">N</span><span class="s3">:</span>
+        <span class="s0">degree </span><span class="s3">= </span><span class="s0">N </span><span class="s3">- </span><span class="s5">1</span>
+    <span class="s2">else</span><span class="s3">:</span>
+        <span class="s0">degree </span><span class="s3">= </span><span class="s0">k</span>
+
+    <span class="s1"># Create the design matrix X with zeros initially</span>
+    <span class="s1"># It has N rows and (degree + 1) columns</span>
+    <span class="s0">X </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">zeros</span><span class="s3">((</span><span class="s0">N</span><span class="s3">, </span><span class="s0">degree </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">))</span>
+
+    <span class="s1"># Fill the design matrix column by column</span>
+    <span class="s2">for </span><span class="s0">i </span><span class="s2">in </span><span class="s0">range</span><span class="s3">(</span><span class="s0">degree </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">):</span>
+        <span class="s0">X</span><span class="s3">[:, </span><span class="s0">i</span><span class="s3">] = </span><span class="s0">x </span><span class="s3">** </span><span class="s0">i</span>
+
+    <span class="s1"># Calculate the least squares coefficients</span>
+    <span class="s1"># Formula: beta = (X^T * X)^(-1) * X^T * y</span>
+    <span class="s0">X_transpose </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">transpose</span><span class="s3">(</span><span class="s0">X</span><span class="s3">)</span>
+    <span class="s0">X_transpose_X </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">matmul</span><span class="s3">(</span><span class="s0">X_transpose</span><span class="s3">, </span><span class="s0">X</span><span class="s3">)</span>
+    <span class="s0">X_transpose_X_inv </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">linalg</span><span class="s3">.</span><span class="s0">inv</span><span class="s3">(</span><span class="s0">X_transpose_X</span><span class="s3">)</span>
+    <span class="s0">X_transpose_y </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">matmul</span><span class="s3">(</span><span class="s0">X_transpose</span><span class="s3">, </span><span class="s0">y</span><span class="s3">)</span>
+
+    <span class="s1"># Coefficients for the effective degree</span>
+    <span class="s0">beta_effective </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">matmul</span><span class="s3">(</span><span class="s0">X_transpose_X_inv</span><span class="s3">, </span><span class="s0">X_transpose_y</span><span class="s3">)</span>
+
+    <span class="s1"># Create the full beta array of size (k + 1) filled with zeros</span>
+    <span class="s0">beta </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">zeros</span><span class="s3">(</span><span class="s0">k </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">)</span>
+
+    <span class="s1"># Copy the calculated coefficients into the final beta array</span>
+    <span class="s2">for </span><span class="s0">i </span><span class="s2">in </span><span class="s0">range</span><span class="s3">(</span><span class="s0">degree </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">):</span>
+        <span class="s0">beta</span><span class="s3">[</span><span class="s0">i</span><span class="s3">] = </span><span class="s0">beta_effective</span><span class="s3">[</span><span class="s0">i</span><span class="s3">]</span>
+
+    <span class="s1"># Calculate the fitted values</span>
+    <span class="s1"># fit = X * beta_effective</span>
+    <span class="s0">fit </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">matmul</span><span class="s3">(</span><span class="s0">X</span><span class="s3">, </span><span class="s0">beta_effective</span><span class="s3">)</span>
+
+    <span class="s1"># Calculate the residuals (actual y - fitted y)</span>
+    <span class="s0">residuals </span><span class="s3">= </span><span class="s0">y </span><span class="s3">- </span><span class="s0">fit</span>
+
+    <span class="s2">return </span><span class="s0">beta</span><span class="s3">, </span><span class="s0">fit</span><span class="s3">, </span><span class="s0">residuals</span>
+<hr class="ls0"><span class="s0">#%% md 
+Use the tests below to check the outputs of the function you have written: <hr class="ls0">#%% 
+</span><span class="s1"># Some tests to make sure your function is working correctly</span>
+
+<span class="s0">xcol </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">arange</span><span class="s3">(-</span><span class="s5">1</span><span class="s3">, </span><span class="s5">1.05</span><span class="s3">, </span><span class="s5">0.1</span><span class="s3">)</span>
+<span class="s0">ycol </span><span class="s3">= </span><span class="s5">2 </span><span class="s3">- </span><span class="s5">7</span><span class="s3">*</span><span class="s0">xcol </span><span class="s3">+ </span><span class="s5">3</span><span class="s3">*(</span><span class="s0">xcol</span><span class="s3">**</span><span class="s5">2</span><span class="s3">)  </span><span class="s1"># We are generating data accoridng to y = 2 - 7x + 3x^2</span>
+<span class="s0">test_matrix </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">transpose</span><span class="s3">(</span><span class="s0">np</span><span class="s3">.</span><span class="s0">vstack</span><span class="s3">((</span><span class="s0">xcol</span><span class="s3">,</span><span class="s0">ycol</span><span class="s3">)))</span>
+<span class="s0">test_matrix</span><span class="s3">.</span><span class="s0">shape</span>
+
+<span class="s0">beta_test </span><span class="s3">= </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">test_matrix</span><span class="s3">, </span><span class="s0">k</span><span class="s3">=</span><span class="s5">2</span><span class="s3">)[</span><span class="s5">0</span><span class="s3">] </span>
+<span class="s2">assert</span><span class="s3">((</span><span class="s0">np</span><span class="s3">.</span><span class="s0">round</span><span class="s3">(</span><span class="s0">beta_test</span><span class="s3">[</span><span class="s5">0</span><span class="s3">], </span><span class="s5">3</span><span class="s3">) == </span><span class="s5">2</span><span class="s3">) </span><span class="s2">and </span><span class="s3">(</span><span class="s0">np</span><span class="s3">.</span><span class="s0">round</span><span class="s3">(</span><span class="s0">beta_test</span><span class="s3">[</span><span class="s5">1</span><span class="s3">], </span><span class="s5">3</span><span class="s3">) == -</span><span class="s5">7</span><span class="s3">) </span><span class="s2">and </span><span class="s3">(</span><span class="s0">np</span><span class="s3">.</span><span class="s0">round</span><span class="s3">(</span><span class="s0">beta_test</span><span class="s3">[</span><span class="s5">2</span><span class="s3">], </span><span class="s5">3</span><span class="s3">) == </span><span class="s5">3</span><span class="s3">))  </span>
+<span class="s1"># We want to check that using the function with k=2 recovers the coefficients exactly</span>
+
+<span class="s1"># Now check the zeroth order fit, i.e., the function gives the correct output with k=0</span>
+<span class="s0">beta_test </span><span class="s3">= </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">test_matrix</span><span class="s3">, </span><span class="s0">k</span><span class="s3">=</span><span class="s5">0</span><span class="s3">)[</span><span class="s5">0</span><span class="s3">]</span>
+<span class="s0">res_test </span><span class="s3">= </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">test_matrix</span><span class="s3">, </span><span class="s0">k</span><span class="s3">=</span><span class="s5">0</span><span class="s3">)[</span><span class="s5">2</span><span class="s3">] </span><span class="s1">#the last output of the function gives the vector of residuals</span>
+
+<span class="s2">assert</span><span class="s3">(</span><span class="s0">np</span><span class="s3">.</span><span class="s0">round</span><span class="s3">(</span><span class="s0">beta_test</span><span class="s3">, </span><span class="s5">3</span><span class="s3">) == </span><span class="s5">3.1</span><span class="s3">)</span>
+<span class="s2">assert</span><span class="s3">(</span><span class="s0">np</span><span class="s3">.</span><span class="s0">round</span><span class="s3">(</span><span class="s0">np</span><span class="s3">.</span><span class="s0">linalg</span><span class="s3">.</span><span class="s0">norm</span><span class="s3">(</span><span class="s0">res_test</span><span class="s3">), </span><span class="s5">3</span><span class="s3">) == </span><span class="s5">19.937</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% md 
+### 1c) Use `polyreg` to fit polynomial models for the data in `xy_data` for $k=2,3,4$: 
+ 
+- Plot the fits for the three cases on the same plot together with the scatterplot of the data. The plots should be labelled and a legend included.  
+- Compute and print the SSE and $R^2$ coefficient for each of the three cases. 
+- Which of the three models you would choose? Briefly justify your choice. <hr class="ls0">#%% 
+</span><span class="s1"># Fit polynomials for k=2, 3, 4</span>
+<span class="s0">beta2</span><span class="s3">, </span><span class="s0">fit2</span><span class="s3">, </span><span class="s0">res2 </span><span class="s3">= </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">, </span><span class="s5">2</span><span class="s3">)</span>
+<span class="s0">beta3</span><span class="s3">, </span><span class="s0">fit3</span><span class="s3">, </span><span class="s0">res3 </span><span class="s3">= </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">, </span><span class="s5">3</span><span class="s3">)</span>
+<span class="s0">beta4</span><span class="s3">, </span><span class="s0">fit4</span><span class="s3">, </span><span class="s0">res4 </span><span class="s3">= </span><span class="s0">polyreg</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">, </span><span class="s5">4</span><span class="s3">)</span>
+
+<span class="s1"># Sort b4 plotting</span>
+<span class="s0">sort_indices </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">argsort</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">0</span><span class="s3">])</span>
+<span class="s0">x_sorted </span><span class="s3">= </span><span class="s0">xy_data</span><span class="s3">[</span><span class="s0">sort_indices</span><span class="s3">, </span><span class="s5">0</span><span class="s3">]</span>
+<span class="s0">fit2_sorted </span><span class="s3">= </span><span class="s0">fit2</span><span class="s3">[</span><span class="s0">sort_indices</span><span class="s3">]</span>
+<span class="s0">fit3_sorted </span><span class="s3">= </span><span class="s0">fit3</span><span class="s3">[</span><span class="s0">sort_indices</span><span class="s3">]</span>
+<span class="s0">fit4_sorted </span><span class="s3">= </span><span class="s0">fit4</span><span class="s3">[</span><span class="s0">sort_indices</span><span class="s3">]</span>
+
+<span class="s1"># Plot scatterplot and fits</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">figure</span><span class="s3">(</span><span class="s0">figsize</span><span class="s3">=(</span><span class="s5">10</span><span class="s3">, </span><span class="s5">6</span><span class="s3">))</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">scatter</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">0</span><span class="s3">], </span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">1</span><span class="s3">], </span><span class="s0">label</span><span class="s3">=</span><span class="s4">'Data points'</span><span class="s3">, </span><span class="s0">alpha</span><span class="s3">=</span><span class="s5">0.6</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">plot</span><span class="s3">(</span><span class="s0">x_sorted</span><span class="s3">, </span><span class="s0">fit2_sorted</span><span class="s3">, </span><span class="s0">label</span><span class="s3">=</span><span class="s4">'Polynomial fit k=2'</span><span class="s3">, </span><span class="s0">color</span><span class="s3">=</span><span class="s4">'red'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">plot</span><span class="s3">(</span><span class="s0">x_sorted</span><span class="s3">, </span><span class="s0">fit3_sorted</span><span class="s3">, </span><span class="s0">label</span><span class="s3">=</span><span class="s4">'Polynomial fit k=3'</span><span class="s3">, </span><span class="s0">color</span><span class="s3">=</span><span class="s4">'green'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">plot</span><span class="s3">(</span><span class="s0">x_sorted</span><span class="s3">, </span><span class="s0">fit4_sorted</span><span class="s3">, </span><span class="s0">label</span><span class="s3">=</span><span class="s4">'Polynomial fit k=4'</span><span class="s3">, </span><span class="s0">color</span><span class="s3">=</span><span class="s4">'blue'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">xlabel</span><span class="s3">(</span><span class="s4">'x'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">ylabel</span><span class="s3">(</span><span class="s4">'y'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">title</span><span class="s3">(</span><span class="s4">'Polynomial Fits for k=2, 3, 4'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">legend</span><span class="s3">()</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">show</span><span class="s3">()</span>
+
+<span class="s1"># For each model, Compute SSE and R^2</span>
+<span class="s0">y </span><span class="s3">= </span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">1</span><span class="s3">]</span>
+<span class="s0">y_mean </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">mean</span><span class="s3">(</span><span class="s0">y</span><span class="s3">)</span>
+<span class="s0">SST </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">sum</span><span class="s3">((</span><span class="s0">y </span><span class="s3">- </span><span class="s0">y_mean</span><span class="s3">)**</span><span class="s5">2</span><span class="s3">)</span>
+
+<span class="s2">for </span><span class="s0">k</span><span class="s3">, </span><span class="s0">res </span><span class="s2">in </span><span class="s3">[(</span><span class="s5">2</span><span class="s3">, </span><span class="s0">res2</span><span class="s3">), (</span><span class="s5">3</span><span class="s3">, </span><span class="s0">res3</span><span class="s3">), (</span><span class="s5">4</span><span class="s3">, </span><span class="s0">res4</span><span class="s3">)]:</span>
+    <span class="s0">SSE </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">sum</span><span class="s3">(</span><span class="s0">res</span><span class="s3">**</span><span class="s5">2</span><span class="s3">)</span>
+    <span class="s0">R2 </span><span class="s3">= </span><span class="s5">1 </span><span class="s3">- </span><span class="s0">SSE </span><span class="s3">/ </span><span class="s0">SST</span>
+    <span class="s0">print</span><span class="s3">(</span><span class="s4">f'For k=</span><span class="s2">{</span><span class="s0">k</span><span class="s2">}</span><span class="s4">: SSE = </span><span class="s2">{</span><span class="s0">SSE</span><span class="s2">:</span><span class="s4">.3f</span><span class="s2">}</span><span class="s4">, R^2 = </span><span class="s2">{</span><span class="s0">R2</span><span class="s2">:</span><span class="s4">.3f</span><span class="s2">}</span><span class="s4">'</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% md 
+ #### State which model you choose and briefly justify your choice. 
+  
+I choose the model with k=3 as it fits the provided data better (higher R^2, lower SSE) compared to k=2. k=4 offers little  improvement in R^2 and can risk overfitting. 
+ <hr class="ls0">#%% md 
+### 1d)  For the model you have chosen in the previous part (either $k=2/3/4)$: 
+ 
+- Plot the residuals in a scatter plot.  
+- Plot a histogram of the residuals along with a Gaussian pdf with zero mean and the same standard deviation as the residuals. <hr class="ls0">#%% 
+</span><span class="s1"># pick model k=3</span>
+
+<span class="s1"># Plot residuals in scatter plot</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">figure</span><span class="s3">(</span><span class="s0">figsize</span><span class="s3">=(</span><span class="s5">10</span><span class="s3">, </span><span class="s5">4</span><span class="s3">))</span>
+
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">subplot</span><span class="s3">(</span><span class="s5">1</span><span class="s3">, </span><span class="s5">2</span><span class="s3">, </span><span class="s5">1</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">scatter</span><span class="s3">(</span><span class="s0">xy_data</span><span class="s3">[:, </span><span class="s5">0</span><span class="s3">], </span><span class="s0">res3</span><span class="s3">, </span><span class="s0">alpha</span><span class="s3">=</span><span class="s5">0.6</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">xlabel</span><span class="s3">(</span><span class="s4">'x'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">ylabel</span><span class="s3">(</span><span class="s4">'Residuals'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">title</span><span class="s3">(</span><span class="s4">'Residuals Scatter Plot for k=3'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">axhline</span><span class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s0">color</span><span class="s3">=</span><span class="s4">'red'</span><span class="s3">)</span>
+
+<span class="s1"># Plot histogram of residuals with Gaussian pdf</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">subplot</span><span class="s3">(</span><span class="s5">1</span><span class="s3">, </span><span class="s5">2</span><span class="s3">, </span><span class="s5">2</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">hist</span><span class="s3">(</span><span class="s0">res3</span><span class="s3">, </span><span class="s0">bins</span><span class="s3">=</span><span class="s5">20</span><span class="s3">, </span><span class="s0">density</span><span class="s3">=</span><span class="s2">True</span><span class="s3">, </span><span class="s0">alpha</span><span class="s3">=</span><span class="s5">0.6</span><span class="s3">, </span><span class="s0">label</span><span class="s3">=</span><span class="s4">'Residuals histogram'</span><span class="s3">)</span>
+
+<span class="s1"># Gaussian pdf with zero mean and same std as the residuals</span>
+<span class="s2">import </span><span class="s0">scipy</span><span class="s3">.</span><span class="s0">stats </span><span class="s2">as </span><span class="s0">stats</span>
+<span class="s0">std_res </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">std</span><span class="s3">(</span><span class="s0">res3</span><span class="s3">)</span>
+<span class="s0">x_gauss </span><span class="s3">= </span><span class="s0">np</span><span class="s3">.</span><span class="s0">linspace</span><span class="s3">(</span><span class="s0">min</span><span class="s3">(</span><span class="s0">res3</span><span class="s3">), </span><span class="s0">max</span><span class="s3">(</span><span class="s0">res3</span><span class="s3">), </span><span class="s5">100</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">plot</span><span class="s3">(</span><span class="s0">x_gauss</span><span class="s3">, </span><span class="s0">stats</span><span class="s3">.</span><span class="s0">norm</span><span class="s3">.</span><span class="s0">pdf</span><span class="s3">(</span><span class="s0">x_gauss</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s0">std_res</span><span class="s3">), </span><span class="s0">label</span><span class="s3">=</span><span class="s4">'Gaussian pdf'</span><span class="s3">, </span><span class="s0">color</span><span class="s3">=</span><span class="s4">'red'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">xlabel</span><span class="s3">(</span><span class="s4">'Residuals'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">ylabel</span><span class="s3">(</span><span class="s4">'Density'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">title</span><span class="s3">(</span><span class="s4">'Residuals Histogram with Gaussian Fit'</span><span class="s3">)</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">legend</span><span class="s3">()</span>
+
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">tight_layout</span><span class="s3">()</span>
+<span class="s0">plt</span><span class="s3">.</span><span class="s0">show</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% md 
+AI Use Statement: 
+LLMs have been used to assist with graph formating for certain plots. It has also been used to provide feedback and guidance regarding the mathematical concepts, and the syntax / functions of numpy and matplotlib, debugging, and completing some line comments for documentation / readability (most are done manually though).</span></pre>
+</body>
+</html>
